@@ -11,7 +11,10 @@ jobs:
             - "SHA256:N14dawQw0mkucf+EuKqi98Z124GNapu4gc+yKHkaR9M"
       - run:
           name: Build Docker Image
-          command: docker build -t $IMAGE_NAME scripts
+          command: |
+            sed -i "s|ARG SHA=\"\"|ARG SHA=\"$(git log | grep ^commit | head -n 2 | awk 'END{print $2}' | cut -b 1-7)\"|" scripts/Dockerfile 
+            cat scripts/Dockerfile | grep "ARG SHA"
+            docker build -t $IMAGE_NAME scripts
       - run:
           name: Push Docker Image
           command: |
