@@ -18,12 +18,10 @@ jobs:
       - run:
           name: Push Docker Image
           command: |
-            commit_id=`git log | grep ^commit | head -n 2 | awk 'END{print $2}' | cut -b 1-7`
-            main_ver=`cat src/version.h | grep "#define VERSION " | awk '{gsub("\"","");print $3}' | cut -b 2-`
-            ver="${main_ver}-${commit_id}"
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker push $IMAGE_NAME
-            docker push ${IMAGE_NAME}:${ver}
+            docker tag $IMAGE_NAME ${IMAGE_NAME}:$(cat src/version.h | grep "#define VERSION " | awk '{gsub("\"","");print $3}' | cut -b 2-)-$(git log | grep ^commit | head -n 2 | awk 'END{print $2}' | cut -b 1-7)
+            docker push ${IMAGE_NAME}:$(cat src/version.h | grep "#define VERSION " | awk '{gsub("\"","");print $3}' | cut -b 2-)-$(git log | grep ^commit | head -n 2 | awk 'END{print $2}' | cut -b 1-7)
       - run:
           name: Deploy
           command: |
